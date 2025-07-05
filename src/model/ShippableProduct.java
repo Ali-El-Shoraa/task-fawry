@@ -1,4 +1,4 @@
-// model/ShippableProduct.java
+
 package model;
 
 public class ShippableProduct extends Product {
@@ -9,7 +9,7 @@ public class ShippableProduct extends Product {
         this.shippingCost = shippingCost;
     }
 
-    // احذف @Override هنا إذا لم تكن تُعيد صياغة دالة من الأب
+
     public double getShippingCost() {
         return shippingCost;
     }

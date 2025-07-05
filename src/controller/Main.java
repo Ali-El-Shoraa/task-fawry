@@ -10,13 +10,13 @@ import interfaces.Shippable;
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // المنتجات الثابتة
+        // 
         Product cheese = new ExpirableShippableProduct("Cheese", 100, 10, 0.4);
         Product biscuits = new ExpirableShippableProduct("Biscuits", 150, 5, 0.7);
         Product tv = new ShippableProduct("TV", 5000, 3, 10);
         Product scratchCard = new Product("Scratch Card", 50, 20);
 
-        // اسم الكاشير
+        // casheir name
         String cashierName;
         System.out.print("Enter cashier name: ");
         while (true) {
@@ -31,10 +31,10 @@ import interfaces.Shippable;
         CashierInfo cashierInfo = new CashierInfo(cashierName);
         CheckoutService checkoutService = new CheckoutService();
 
-        // ✅ بداية الطلب الأول
+        // first order
         Customer customer = createCustomer(scanner);
         Cart cart = new Cart();
-        cart.addProduct(biscuits, 2); // اختبار
+        cart.addProduct(biscuits, 2);
 
         checkoutService.checkout(customer, cart);
         System.out.println(cashierInfo);
@@ -138,7 +138,7 @@ import interfaces.Shippable;
             System.out.print("Enter stock quantity: ");
             int quantity = Integer.parseInt(scanner.nextLine());
 
-            // ✅ فحص إجابة expirable
+            // check expirable
             boolean expirable;
             while (true) {
                 System.out.print("Is the product expirable? (yes/no): ");
@@ -154,7 +154,7 @@ import interfaces.Shippable;
                 }
             }
 
-            // ✅ فحص إجابة shippable
+            // check shippable
             boolean shippable;
             while (true) {
                 System.out.print("Is the product shippable? (yes/no): ");
