@@ -4,10 +4,13 @@ import model.*;
 import service.*;
 import java.util.Scanner;
 
+import interfaces.Shippable;
+
 public class Main {
     public static void main(String[] args) {
+
         Scanner scanner = new Scanner(System.in);
-        // إنشاء المنتجات
+        // Generate Products
         Product cheese = new ExpirableShippableProduct("Cheese", 100, 10, 0.4);
         Product biscuits = new ExpirableShippableProduct("Biscuits", 150, 5, 0.7);
         Product tv = new ShippableProduct("TV", 5000, 3, 10);
@@ -15,7 +18,7 @@ public class Main {
 
         Customer customer = new Customer("Ali", 1000);
 
-       String cashierName;
+        String cashierName;
         System.out.print("Enter cashier name: ");
         while (true) {
             cashierName = scanner.nextLine().trim();
@@ -28,26 +31,140 @@ public class Main {
 
         CashierInfo cashierInfo = new CashierInfo(cashierName);
 
-
         Cart cart = new Cart();
-        // cart.addProduct(cheese, 2);
-        cart.addProduct(biscuits, 1);
-        // cart.addProduct(scratchCard, 1);
-        cart.addProduct(tv, 1);
+        cart.addProduct(biscuits, 2);
 
         CheckoutService checkoutService = new CheckoutService();
         checkoutService.checkout(customer, cart);
 
         System.out.println(cashierInfo);
 
-        promptToExit();
+        while (true) {
+            System.out.println("\n===== E-Commerce Menu =====");
+            System.out.println("1- Add a product to cart");
+            System.out.println("2- View cart");
+            System.out.println("3- Proceed to checkout");
+            System.out.println("4- Exit");
+            System.out.print("Enter your choice: ");
+            String choice = scanner.nextLine();
+
+            switch (choice) {
+                case "1":
+                    Product product = createProduct(scanner);
+                    if (product == null) break;
+
+                    System.out.print("Enter quantity: ");
+                    int qty = Integer.parseInt(scanner.nextLine());
+                    if (qty > product.getQuantity()) {
+                        System.out.println("Only " + product.getQuantity() + " available. Cannot add more.");
+                        break;
+                    }
+
+                    cart.addProduct(product, qty);
+                    System.out.println("Product added to cart.");
+                    break;
+
+                case "2":
+                    if (cart.isEmpty()) {
+                        System.out.println("Cart is empty.");
+                    } else {
+                        System.out.println("Cart Contents:");
+                        for (CartItem item : cart.getItems()) {
+                            Product p = item.getProduct();
+                            System.out.println(item.getQuantity() + "x " + p.getName() +
+                                    " | Price: " + p.getPrice() +
+                                    (p.requiresShipping() ? " | Weight: " + ((Shippable) p).getWeight() + "kg" : "") +
+                                    (p.isExpired() ? " | Expirable" : ""));
+                        }
+                    }
+                    break;
+
+                case "3":
+                    if (cart.isEmpty()) {
+                        System.out.println("Cannot checkout. Cart is empty.");
+                        break;
+                    }
+                    checkoutService.checkout(customer, cart);
+                    System.out.println(cashierInfo);
+                    // cart = new Cart(); // ❌ تمت إزالته حسب طلبك
+                    break;
+
+                case "4":
+                    System.out.println("Exiting...");
+                    promptToExit();
+                    return;
+
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
+        }
     }
 
+    private static Product createProduct(Scanner scanner) {
+        try {
+            System.out.print("Enter product name: ");
+            String name = scanner.nextLine();
+
+            System.out.print("Enter price: ");
+            double price = Double.parseDouble(scanner.nextLine());
+
+            System.out.print("Enter stock quantity: ");
+            int quantity = Integer.parseInt(scanner.nextLine());
+
+            // ✅ فحص إجابة expirable
+            boolean expirable;
+            while (true) {
+                System.out.print("Is the product expirable? (yes/no): ");
+                String input = scanner.nextLine().trim().toLowerCase();
+                if (input.equals("yes")) {
+                    expirable = true;
+                    break;
+                } else if (input.equals("no")) {
+                    expirable = false;
+                    break;
+                } else {
+                    System.out.println("❌ Invalid input. Please enter 'yes' or 'no'.");
+                }
+            }
+
+            // ✅ فحص إجابة shippable
+            boolean shippable;
+            while (true) {
+                System.out.print("Is the product shippable? (yes/no): ");
+                String input = scanner.nextLine().trim().toLowerCase();
+                if (input.equals("yes")) {
+                    shippable = true;
+                    break;
+                } else if (input.equals("no")) {
+                    shippable = false;
+                    break;
+                } else {
+                    System.out.println("❌ Invalid input. Please enter 'yes' or 'no'.");
+                }
+            }
+
+            double weight = 0;
+            if (shippable) {
+                System.out.print("Enter weight in kg: ");
+                weight = Double.parseDouble(scanner.nextLine());
+            }
+
+            if (expirable && shippable)
+                return new ExpirableShippableProduct(name, price, quantity, weight);
+            if (expirable)
+                return new Product(name, price, quantity);
+            if (shippable)
+                return new ShippableProduct(name, price, quantity, weight);
+
+            return new Product(name, price, quantity);
+        } catch (Exception e) {
+            System.out.println("Invalid input. Try again.");
+            return null;
+        }
+    }
 
     private static void promptToExit() {
         System.out.println("\nPress ENTER to exit...");
-        Scanner scanner = new Scanner(System.in);
-  
-        scanner.close();
+        new Scanner(System.in).nextLine();
     }
 }
